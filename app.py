@@ -11,6 +11,7 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 import re, os
+import stock
 
 app = Flask(__name__)
 
@@ -50,14 +51,16 @@ def handle_message(event):
 
     if re.match('新增[0-9]{4}',usespeak): # 先判斷是否是使用者要用來存股票的
         line_bot_api.push_message(uid, TextSendMessage(usespeak+'已經儲存成功'))
-        print(usespeak)
         return 0
 
     
     elif re.match('刪除[0-9]{4}',usespeak): # 刪除存在資料庫裡面的股票
         line_bot_api.push_message(uid, TextSendMessage(usespeak+'已經刪除成功'))
-        print(usespeak)
         return 0
+    
+    elif re.match('投信買超',usespeak):
+        df = stock.get_invest_buy()
+        line_bot_api.push_message(uid, TextSendMessage(df.to_string(index=False)))
 
     else:
         message = TextSendMessage(text=event.message.text)
