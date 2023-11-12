@@ -43,8 +43,11 @@ def handle_message(event):
     ### 抓到顧客的資料 ###
     profile = line_bot_api.get_profile(event.source.user_id)
     uid = profile.user_id #使用者ID
-    usespeak=TextSendMessage(text=event.message.text) #使用者講的話
-    
+    print(uid)
+
+    usespeak=str(event.message.text) #使用者講的話
+    print(usespeak)
+
     if re.match('新增[0-9]{4}',usespeak): # 先判斷是否是使用者要用來存股票的
         line_bot_api.push_message(uid, TextSendMessage(usespeak+'已經儲存成功'))
         print(usespeak)
@@ -57,7 +60,8 @@ def handle_message(event):
         return 0
 
     else:
-        line_bot_api.reply_message(event.reply_token,usespeak)
+        message = TextSendMessage(text=event.message.text)
+        line_bot_api.reply_message(event.reply_token,message)
 
 
 if __name__ == '__main__':
