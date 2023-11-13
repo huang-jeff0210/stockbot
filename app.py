@@ -11,7 +11,7 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 import re, os
-import stock
+import stock_srapy
 
 app = Flask(__name__)
 
@@ -59,7 +59,7 @@ def handle_message(event):
         return 0
     
     elif re.match('投信買超',usespeak):
-        df = stock.get_invest_buy()
+        df = stock_srapy.get_invest()
         line_bot_api.push_message(uid, TextSendMessage(df.to_string(index=False)))
 
     else:
