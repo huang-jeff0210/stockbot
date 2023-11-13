@@ -10,8 +10,8 @@ warnings.filterwarnings("ignore")
 
 # 數據庫連接訊息
 #engine = create_engine("mysql+pymysql://user:password@host:port/databasename?charset=utf8") 
-engine = create_engine("mysql+pymysql://jobuser:1q2w3e4r5t_@127.0.0.1:3306/stock?charset=utf8")
-conn = pymysql.connect(host='localhost',user='jobuser',passwd='1q2w3e4r5t_',db='stock', port = 3306,charset="utf8")
+engine = create_engine("mysql+pymysql://admin:1q2w3e4r5t_@mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com:3306/stock?charset=utf8")
+conn = pymysql.connect(host='mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com',user='admin',passwd='1q2w3e4r5t_',db='stock', port = 3306,charset="utf8")
 
 
 def clean_space(data):
