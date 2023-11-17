@@ -23,7 +23,7 @@ def clean_space(data):
             data[col] = data[col].str.replace('\u3000','')
     return data
 
-def get_invest():
+def get_invest(text):
     millisec = int(round(time.time() * 1000))
     url = f'https://www.twse.com.tw/rwd/zh/fund/TWT44U?response=json&_={millisec}'
     resp = requests.get(url)
@@ -95,13 +95,31 @@ def get_invest():
     print(df3)
     # df.to_sql(name = 'tbl_institutional_investors',con=engine, if_exists = 'append',index = False)
 
+    if text == '投信買超':
+        invest = pd.concat([df,df2,df3],axis=0, ignore_index=True)
+        invest = invest.sort_values(by='BuySellvol',ascending=False)
+        invest_return = invest[['Stockcode','Stockname','BuySellvol']].head(10)
+        columns = ['股號','名稱','買賣超']
+        invest_return.columns = columns
+        invest_return['買賣超'] = invest_return['買賣超'].astype(int)
+        invest_return['買賣超'] = invest_return['買賣超'].astype(str) + '張'
 
-    invest = pd.concat([df,df2,df3],axis=0, ignore_index=True)
-    invest = invest.sort_values(by='BuySellvol',ascending=False)
-    invest_return = invest[['Stockcode','Stockname','BuySellvol']].head(10)
-    columns = ['股號','名稱','買賣超']
-    invest_return.columns = columns
-    return invest_return
+        # 将DataFrame转换为字符串，包含索引
+        result_str = invest_return.to_string(index=True)
+        return result_str
+    
+    elif text == '投信賣超':
+        invest = pd.concat([df,df2,df3],axis=0, ignore_index=True)
+        invest = invest.sort_values(by='BuySellvol',ascending=True)
+        invest_return = invest[['Stockcode','Stockname','BuySellvol']].head(10)
+        columns = ['股號','名稱','買賣超']
+        invest_return.columns = columns
+        invest_return['買賣超'] = invest_return['買賣超'].astype(int)
+        invest_return['買賣超'] = invest_return['買賣超'].astype(str) + '張'
+
+        # 将DataFrame转换为字符串，包含索引
+        result_str = invest_return.to_string(index=True)
+        return result_str
 
 def get_price(stock):
     url = f'https://srvsolgw.capital.com.tw/info/Query.aspx?stocks={stock}&types=Open,High,Low,Deal,DQty,YDay'
