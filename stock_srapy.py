@@ -1,6 +1,7 @@
 import requests
 import time
 import pandas as pd
+import re
 import datetime
 import pymysql
 from sqlalchemy import create_engine
@@ -102,5 +103,33 @@ def get_invest():
     invest_return.columns = columns
     return invest_return
 
+def get_price(stock):
+    url = f'https://srvsolgw.capital.com.tw/info/Query.aspx?stocks={stock}&types=Open,High,Low,Deal,DQty,YDay'
+    resp = requests.get(url)
+    data = resp.text
+    pattern = re.compile(r'StockID=(\d+),Open=([\d.]+),High=([\d.]+),Low=([\d.]+),Deal=([\d.]+),DQty=(\d+),YDay=([\d.]+)')
 
+    matches = pattern.findall(data)
+
+    columns = ['股號', '開盤價', '最高價', '最低價', '現價', '成交量', '昨日收盤價']
+    df = pd.DataFrame(matches, columns=columns)
+    df['漲跌幅'] = round((df['現價'].astype(float) - df['昨日收盤價'].astype(float))/df['昨日收盤價'].astype(float)*100,2)
+
+    numeric_columns = ['開盤價', '最高價', '最低價', '現價', '成交量', '昨日收盤價','漲跌幅']
+    df[numeric_columns] = df[numeric_columns].astype(float)
+
+    stock_id = df['股號'].iloc[0]
+    current_price = df['現價'].iloc[0]
+    trade_volume = df['成交量'].iloc[0]
+    highlow = df['漲跌幅'].iloc[0]
+
+    if highlow > 0:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:▲{highlow}%"
+    elif highlow < 0:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:▼{highlow}%"
+    else:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:{highlow}%"
+    
+    return text
+    
 
