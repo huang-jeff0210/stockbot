@@ -64,7 +64,7 @@ def handle_message(event):
         return 0
     
     elif re.match('[0-9]{4}',usespeak):
-        answer = stock_srapy.get_price()
+        answer = stock_srapy.get_price(usespeak)
         line_bot_api.push_message(uid, TextSendMessage(answer))
         return 0
 
