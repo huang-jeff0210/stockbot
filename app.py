@@ -62,6 +62,11 @@ def handle_message(event):
         answer = stock_srapy.get_invest(usespeak)
         line_bot_api.push_message(uid, TextSendMessage(answer))
         return 0
+
+    elif re.match('投信賣超',usespeak):
+        answer = stock_srapy.get_invest(usespeak)
+        line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
     
     elif re.match('[0-9]{4}',usespeak):
         answer = stock_srapy.get_price(usespeak
