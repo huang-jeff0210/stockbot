@@ -23,6 +23,7 @@ def clean_space(data):
             data[col] = data[col].str.replace('\u3000','')
     return data
 
+#最近工作日投信買賣超
 def get_invest(text):
     millisec = int(round(time.time() * 1000))
     url = f'https://www.twse.com.tw/rwd/zh/fund/TWT44U?response=json&_={millisec}'
@@ -66,7 +67,7 @@ def get_invest(text):
         df2['BuySellvol'] = pd.to_numeric(df2['BuySellvol'])
         pass
     clean_space(df2)
-    print(df2)
+
     # df.to_sql(name = 'tbl_institutional_investors',con=engine, if_exists = 'append',index = False)
 
     url = f'https://www.tpex.org.tw/web/stock/3insti/sitc_trading/sitctr_result.php?l=zh-tw&t=D&type=sell&_={millisec}'
@@ -92,12 +93,13 @@ def get_invest(text):
         df3['BuySellvol'] = pd.to_numeric(df3['BuySellvol'])
         pass
     clean_space(df3)
-    print(df3)
+
     # df.to_sql(name = 'tbl_institutional_investors',con=engine, if_exists = 'append',index = False)
 
     if text == '投信買超':
         invest = pd.concat([df,df2,df3],axis=0, ignore_index=True)
-        invest = invest.sort_values(by='BuySellvol',ascending=False)
+        invest = invest.sort_values(by='BuySellvol',ascending=False).reset_index(drop=True)
+        invest.index += 1
         invest_return = invest[['Stockcode','Stockname','BuySellvol']].head(10)
         columns = ['股號','名稱','買賣超']
         invest_return.columns = columns
@@ -110,7 +112,8 @@ def get_invest(text):
     
     elif text == '投信賣超':
         invest = pd.concat([df,df2,df3],axis=0, ignore_index=True)
-        invest = invest.sort_values(by='BuySellvol',ascending=True)
+        invest = invest.sort_values(by='BuySellvol',ascending=True).reset_index(drop=True)
+        invest.index += 1
         invest_return = invest[['Stockcode','Stockname','BuySellvol']].head(10)
         columns = ['股號','名稱','買賣超']
         invest_return.columns = columns
@@ -121,6 +124,7 @@ def get_invest(text):
         result_str = invest_return.to_string(index=True)
         return result_str
 
+#即時報價
 def get_price(stock):
     url = f'https://srvsolgw.capital.com.tw/info/Query.aspx?stocks={stock}&types=Open,High,Low,Deal,DQty,YDay'
     resp = requests.get(url)
