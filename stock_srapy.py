@@ -2,11 +2,18 @@ import requests
 import time
 import pandas as pd
 import re
-import datetime
+from datetime import datetime, timedelta
 import pymysql
 from sqlalchemy import create_engine
 import warnings
 warnings.filterwarnings("ignore")
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import Imgur
+
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
+plt.rcParams['axes.unicode_minus'] = False # 顯示負號
 
 
 # 數據庫連接訊息
@@ -154,4 +161,36 @@ def get_price(stock):
     
     return text
     
+
+#查融資融券
+def MarginPurchaseShortSale(stock):
+    date = datetime.now().date() - timedelta(days=30)
+    url = "https://api.finmindtrade.com/api/v4/data"
+    parameter = {
+        "dataset": "TaiwanStockMarginPurchaseShortSale",
+        "data_id": f"{stock}",
+        "start_date": f"{date}",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNCAxOTo1NTo1NSIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYxLjIzMS41Ljc1In0.g86TUOTpETIiRWvYQdBGXXP3LugXYI0I5arWVTYa3TY", # 參考登入，獲取金鑰
+    }
+    data = requests.get(url, params=parameter)
+    data = data.json()
+    data = pd.DataFrame(data['data'])
+
+    fig, axs = plt.subplots(2)
+    data['date'] = pd.to_datetime(data['date'])
+
+    axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資增減')
+    axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券增減')
+    axs[0].set_title('融資融券增減')
+    axs[0].set_xticks([])  # 隐藏 x 轴刻度
+
+    axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資餘額')
+    axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券餘額')
+    axs[1].set_title('融資融券餘額')
+
+
+    plt.savefig('MarginPurchaseShortSale.jpg')
+    plt.close() # 殺掉記憶體中的圖片
+    return Imgur.showImgur("MarginPurchaseShortSale")
+
 

@@ -52,7 +52,6 @@ def handle_message(event):
     if re.match('新增[0-9]{4}',usespeak): # 先判斷是否是使用者要用來存股票的
         line_bot_api.push_message(uid, TextSendMessage(usespeak+'已經儲存成功'))
         return 0
-
     
     elif re.match('刪除[0-9]{4}',usespeak): # 刪除存在資料庫裡面的股票
         line_bot_api.push_message(uid, TextSendMessage(usespeak+'已經刪除成功'))
@@ -69,9 +68,13 @@ def handle_message(event):
         return 0
     
     elif re.match('[0-9]{4}',usespeak):
-        answer = stock_srapy.get_price(usespeak
-                                       )
+        answer = stock_srapy.get_price(usespeak)
         line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
+    
+    elif re.match('[0-9]{4}融資融券',usespeak):
+        img_url = stock_srapy.MarginPurchaseShortSale(usespeak[:3])
+        line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
 
     else:
