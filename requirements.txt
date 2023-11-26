@@ -11,4 +11,4 @@ imgur-python
 imgurpython
 FinMind
 mplfinance
-dateutil
+python-dateutil
