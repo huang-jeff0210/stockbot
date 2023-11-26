@@ -10,3 +10,4 @@ requests
 sqlalchemy
 matplotlib
 imgur-python
+imgurpython
