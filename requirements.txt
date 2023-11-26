@@ -1,15 +1,13 @@
 line-bot-sdk
 bs4
 flask
-pymongo
 datetime
 pandas
 scipy
 pymysql
 requests
-sqlalchemy
 matplotlib
 imgur-python
 imgurpython
-html2image
 FinMind
+mplfinance
