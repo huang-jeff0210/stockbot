@@ -3,26 +3,18 @@ import time
 import pandas as pd
 import re
 from datetime import datetime, timedelta
-import pymysql
-from sqlalchemy import create_engine
 import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 from matplotlib.font_manager import FontProperties
 import Imgur
+import mplfinance as mpf
 
 # 设置中文字体
 font_path = './msjh.ttc'
 font_prop = FontProperties(fname=font_path)
 plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
 plt.rcParams['axes.unicode_minus'] = False # 顯示負號
-
-
-# 數據庫連接訊息
-#engine = create_engine("mysql+pymysql://user:password@host:port/databasename?charset=utf8") 
-# engine = create_engine("mysql+pymysql://admin:1q2w3e4r5t_@mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com:3306/stock?charset=utf8")
-# conn = pymysql.connect(host='mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com',user='admin',passwd='1q2w3e4r5t_',db='stock', port = 3306,charset="utf8")
 
 # 股票代碼與股票名稱
 df = pd.read_csv('stock.csv')
@@ -201,33 +193,57 @@ def MarginPurchaseShortSale(stock):
     plt.close() # 殺掉記憶體中的圖片
     return Imgur.showImgur("MarginPurchaseShortSale")
 
+#股價走勢
+def price_trend(stock):
+    date = datetime.now().date() - timedelta(years=1)
+    url = "https://api.finmindtrade.com/api/v4/data"
+    parameter = {
+        "dataset": "TaiwanStockPrice",
+        "data_id": f"{stock}",
+        "start_date": f"{date}",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNiAxNzo0MDozMiIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYxLjIzMS41LjE3In0.KM9MXxIahnfxhqhKWjzSkGZ7gg0IDeUqGaw5LW7azjY"
+    }
+    response = requests.get(url, params=parameter)
+    data = response.json()
+    df = pd.DataFrame(data["data"])
+    df["date"] = pd.to_datetime(df["date"])
+    df.head(3)
 
-# 個股資訊總覽
-def get_stock_info(stock):
-    import FinMind
-    from FinMind.data import DataLoader
-    from FinMind import plotting
+    df = df[["date", "Trading_Volume", "open", "max", "min", "close"]]
+    columns = ['Date', 'Volume', 'Open', 'High', 'Low', 'Close']
+    df.columns = columns
 
-    todaydate = datetime.now().date()
-    datebefore = datetime.now().date() - timedelta(days=1000)
-    stock_id = f'{stock}'
-    start_date = f'{datebefore}'
-    end_date = f'{todaydate}'
-    data_loader = DataLoader()
-    stock_data = data_loader.taiwan_stock_daily(stock_id, start_date, end_date)
-    stock_data = data_loader.feature.add_kline_institutional_investors(
-        stock_data
-    )
-    stock_data = data_loader.feature.add_kline_margin_purchase_short_sale(
-        stock_data
-    )
-    # 繪製k線圖
-    kline_plot = plotting.kline(stock_data)
+    df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
+    df.set_index('Date', inplace=True)
+
+    df['5MA'] = df['Close'].rolling(window=5).mean()
+    df['10MA'] = df['Close'].rolling(window=10).mean()
+    df['20MA'] = df['Close'].rolling(window=20).mean()
+    df['60MA'] = df['Close'].rolling(window=60).mean()
+    df['120MA'] = df['Close'].rolling(window=120).mean()
+
+    df = df.dropna()
+    mc = mpf.make_marketcolors(up='r',down='g',edge='',wick='inherit',volume='inherit')
+
+    added_plots = {"5MA" : mpf.make_addplot(df['5MA']),
+                "10MA" : mpf.make_addplot(df['10MA']),
+                "20MA" : mpf.make_addplot(df['20MA']),
+                "60MA" : mpf.make_addplot(df['60MA']),
+                "120MA" : mpf.make_addplot(df['120MA']),
+    }
+    fig, axes = mpf.plot(df, type='candle', style='yahoo', volume=True, addplot=list(added_plots.values()), returnfig=True)
+
+    axes[0].legend([None]*(len(added_plots)+2))
+    handles = axes[0].get_legend().legendHandles
+    axes[0].legend(handles=handles[:],labels=list(added_plots.keys()))
+    fig.tight_layout()
+    fig.savefig('pricetrend.jpg')
+    return Imgur.showImgur("pricetrend")
 
 
-    from html2image import Html2Image
-    hti = Html2Image()
-    hti.screenshot(
-        html_file='kline.html', save_as='stock.jpg'
-    )
-    return Imgur.showImgur("stock")
+
+
+
+
+
+
