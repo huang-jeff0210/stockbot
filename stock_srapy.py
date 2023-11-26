@@ -9,7 +9,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from imgurpython import Imgur
+from imgur_python import Imgur
 
 # 设置中文字体
 plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
