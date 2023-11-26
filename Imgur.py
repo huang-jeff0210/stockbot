@@ -5,11 +5,11 @@ import matplotlib
 matplotlib.use('Agg')
 import datetime
 from imgurpython import ImgurClient
-client_id = '447033fdae16e0d'
-client_secret = '54b7828028af07868ba2ce03779d2ae2c0360030'
+client_id = '7e073260d098344'
+client_secret = '75a31c61503bd934f884fbffe955fe6981f2285d'
 album_id = 'utjyeVo'
-access_token = 'c9b7bff6c4c86a091d52d54dd7c8ccd6d95bd288'
-refresh_token = '59e144b544f1fc35aeb15982e436bd47f5f4deaa'
+access_token = '5152e80d42f915e6dacf7d342b2571e327c9cf3d'
+refresh_token = 'c195cf62e30ef044fb85564310b76cf4b44d2c1c'
 
 def showImgur(fileName):
     # connect imgur
@@ -26,7 +26,7 @@ def showImgur(fileName):
     # Upload file
     try:
         print("[log:INFO]Uploading image... ")
-        imgurl = client.upload_from_path(fileName+'.png', config=config, anon=False)['link']
+        imgurl = client.upload_from_path(fileName+'.jpg', config=config, anon=False)['link']
         #string to dict
         print("[log:INFO]Done upload. ")
     except :
