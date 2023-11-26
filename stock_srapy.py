@@ -24,6 +24,9 @@ plt.rcParams['axes.unicode_minus'] = False # 顯示負號
 # engine = create_engine("mysql+pymysql://admin:1q2w3e4r5t_@mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com:3306/stock?charset=utf8")
 # conn = pymysql.connect(host='mysql00.cboucftgvuzl.ap-northeast-1.rds.amazonaws.com',user='admin',passwd='1q2w3e4r5t_',db='stock', port = 3306,charset="utf8")
 
+# 股票代碼與股票名稱
+df = pd.read_csv('stock.csv')
+stock_dict = dict(zip(df['stock_id'],df['stock_name']))
 
 def clean_space(data):
     for col in data.columns:
@@ -184,12 +187,12 @@ def MarginPurchaseShortSale(stock):
 
     axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資增減')
     axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券增減')
-    axs[0].set_title('融資融券增減', fontproperties=font_prop)
+    axs[0].set_title(stock_dict[f'{stock}']({stock}),' 融資融券增減', fontproperties=font_prop)
     axs[0].set_xticks([])  # 隐藏 x 轴刻度
 
     axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資餘額')
     axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券餘額')
-    axs[1].set_title('融資融券餘額', fontproperties=font_prop)
+    axs[1].set_title(stock_dict[f'{stock}']({stock}),' 融資融券餘額', fontproperties=font_prop)
 
 
     plt.savefig('MarginPurchaseShortSale.jpg')
