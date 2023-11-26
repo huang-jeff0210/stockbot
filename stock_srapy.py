@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import re
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ import mplfinance as mpf
 # 设置中文字体
 font_path = './msjh.ttc'
 font_prop = FontProperties(fname=font_path)
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
+# plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
 plt.rcParams['axes.unicode_minus'] = False # 顯示負號
 
 # 股票代碼與股票名稱
@@ -195,7 +196,7 @@ def MarginPurchaseShortSale(stock):
 
 #股價走勢
 def price_trend(stock):
-    date = datetime.now().date() - timedelta(years=1)
+    date = datetime.now().date() - relativedelta(years=1)
     url = "https://api.finmindtrade.com/api/v4/data"
     parameter = {
         "dataset": "TaiwanStockPrice",
