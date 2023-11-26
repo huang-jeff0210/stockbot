@@ -240,7 +240,7 @@ def price_trend(stock):
     axes[0].legend(handles=handles[:],labels=list(added_plots.keys()))
     fig.tight_layout()
     fig.savefig('pricetrend.jpg')
-    # return Imgur.showImgur("pricetrend")
+    return Imgur.showImgur("pricetrend")
 
 
 
