@@ -2,7 +2,8 @@
 Upload pics
 '''
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 import datetime
 from imgurpython import ImgurClient
 client_id = '7e073260d098344'
@@ -10,6 +11,9 @@ client_secret = '75a31c61503bd934f884fbffe955fe6981f2285d'
 album_id = 'utjyeVo'
 access_token = '5152e80d42f915e6dacf7d342b2571e327c9cf3d'
 refresh_token = 'c195cf62e30ef044fb85564310b76cf4b44d2c1c'
+
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
+plt.rcParams['axes.unicode_minus'] = False # 顯示負號
 
 def showImgur(fileName):
     # connect imgur
