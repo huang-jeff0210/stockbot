@@ -194,8 +194,8 @@ def MarginPurchaseShortSale(stock):
     axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券')
     axs[1].set_title(f'{stock_dict[stock]}({stock})近一個月融資融券餘額', fontproperties=font_prop)
 
-    axs[0].legend()
-    axs[1].legend()
+    axs[0].legend(prop=font_prop)
+    axs[1].legend(prop=font_prop)
 
     plt.savefig('MarginPurchaseShortSale.jpg')
     plt.close() # 殺掉記憶體中的圖片
