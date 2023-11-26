@@ -187,12 +187,12 @@ def MarginPurchaseShortSale(stock):
 
     axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資增減')
     axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券增減')
-    axs[0].set_title(stock_dict[f'{stock}']({stock}),' 融資融券增減', fontproperties=font_prop)
+    axs[0].set_title(f'{stock_dict[stock]}({stock})近一個月融資融券增減', fontproperties=font_prop)
     axs[0].set_xticks([])  # 隐藏 x 轴刻度
 
     axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資餘額')
     axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券餘額')
-    axs[1].set_title(stock_dict[f'{stock}']({stock}),' 融資融券餘額', fontproperties=font_prop)
+    axs[1].set_title(f'{stock_dict[stock]}({stock})近一個月融資融券餘額', fontproperties=font_prop)
 
 
     plt.savefig('MarginPurchaseShortSale.jpg')
