@@ -209,7 +209,7 @@ def get_stock_info(stock):
     from FinMind import plotting
 
     todaydate = datetime.now().date()
-    datebefore = datetime.now().date() - timedelta(days=90)
+    datebefore = datetime.now().date() - timedelta(days=1000)
     stock_id = f'{stock}'
     start_date = f'{datebefore}'
     end_date = f'{todaydate}'
@@ -228,6 +228,6 @@ def get_stock_info(stock):
     from html2image import Html2Image
     hti = Html2Image()
     hti.screenshot(
-        html_file='kline.html', save_as='stock.png'
+        html_file='kline.html', save_as='stock.jpg'
     )
     return Imgur.showImgur("stock")
