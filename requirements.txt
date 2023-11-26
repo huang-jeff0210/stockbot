@@ -11,3 +11,5 @@ sqlalchemy
 matplotlib
 imgur-python
 imgurpython
+html2image
+FinMind

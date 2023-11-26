@@ -202,3 +202,32 @@ def MarginPurchaseShortSale(stock):
     return Imgur.showImgur("MarginPurchaseShortSale")
 
 
+# 個股資訊總覽
+def get_stock_info(stock):
+    import FinMind
+    from FinMind.data import DataLoader
+    from FinMind import plotting
+
+    todaydate = datetime.now().date()
+    datebefore = datetime.now().date() - timedelta(days=90)
+    stock_id = f'{stock}'
+    start_date = f'{datebefore}'
+    end_date = f'{todaydate}'
+    data_loader = DataLoader()
+    stock_data = data_loader.taiwan_stock_daily(stock_id, start_date, end_date)
+    stock_data = data_loader.feature.add_kline_institutional_investors(
+        stock_data
+    )
+    stock_data = data_loader.feature.add_kline_margin_purchase_short_sale(
+        stock_data
+    )
+    # 繪製k線圖
+    kline_plot = plotting.kline(stock_data)
+
+
+    from html2image import Html2Image
+    hti = Html2Image()
+    hti.screenshot(
+        html_file='kline.html', save_as='stock.png'
+    )
+    return Imgur.showImgur("stock")
