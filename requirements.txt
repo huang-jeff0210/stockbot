@@ -9,4 +9,4 @@ pymysql
 requests
 sqlalchemy
 matplotlib
-imgurpython==1.1.7
+imgur-python
