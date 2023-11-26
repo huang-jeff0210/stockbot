@@ -185,15 +185,17 @@ def MarginPurchaseShortSale(stock):
     fig, axs = plt.subplots(2)
     data['date'] = pd.to_datetime(data['date'])
 
-    axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資增減')
-    axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券增減')
+    axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資')
+    axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券')
     axs[0].set_title(f'{stock_dict[stock]}({stock})近一個月融資融券增減', fontproperties=font_prop)
     axs[0].set_xticks([])  # 隐藏 x 轴刻度
 
-    axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資餘額')
-    axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券餘額')
+    axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資')
+    axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券')
     axs[1].set_title(f'{stock_dict[stock]}({stock})近一個月融資融券餘額', fontproperties=font_prop)
 
+    axs[0].legend()
+    axs[1].legend()
 
     plt.savefig('MarginPurchaseShortSale.jpg')
     plt.close() # 殺掉記憶體中的圖片
