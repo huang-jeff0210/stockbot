@@ -9,9 +9,12 @@ import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+from matplotlib.font_manager import FontProperties
 import Imgur
 
 # 设置中文字体
+font_path = './msjh.ttc'
+font_prop = FontProperties(fname=font_path)
 plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei'] # 修改中文字體
 plt.rcParams['axes.unicode_minus'] = False # 顯示負號
 
@@ -181,12 +184,12 @@ def MarginPurchaseShortSale(stock):
 
     axs[0].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseBuy']-data['MarginPurchaseCashRepayment']-data['MarginPurchaseSell'], label='融資增減')
     axs[0].plot(data['date'].dt.strftime('%d'), data['ShortSaleSell']-data['ShortSaleBuy']-data['ShortSaleCashRepayment'], label='融券增減')
-    axs[0].set_title('融資融券增減')
+    axs[0].set_title('融資融券增減', fontproperties=font_prop)
     axs[0].set_xticks([])  # 隐藏 x 轴刻度
 
     axs[1].plot(data['date'].dt.strftime('%d'), data['MarginPurchaseTodayBalance'], label='融資餘額')
     axs[1].plot(data['date'].dt.strftime('%d'), data['ShortSaleTodayBalance'], label='融券餘額')
-    axs[1].set_title('融資融券餘額')
+    axs[1].set_title('融資融券餘額', fontproperties=font_prop)
 
 
     plt.savefig('MarginPurchaseShortSale.jpg')
