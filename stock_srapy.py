@@ -232,14 +232,15 @@ def price_trend(stock):
                 "60MA" : mpf.make_addplot(df['60MA']),
                 "120MA" : mpf.make_addplot(df['120MA']),
     }
-    fig, axes = mpf.plot(df, type='candle', style='yahoo', volume=True, addplot=list(added_plots.values()), returnfig=True)
+    s = mpf.make_mpf_style(marketcolors = mc)
+    fig, axes = mpf.plot(df, type='candle', style=s, volume=True, addplot=list(added_plots.values()), returnfig=True)
 
     axes[0].legend([None]*(len(added_plots)+2))
     handles = axes[0].get_legend().legendHandles
     axes[0].legend(handles=handles[:],labels=list(added_plots.keys()))
     fig.tight_layout()
     fig.savefig('pricetrend.jpg')
-    return Imgur.showImgur("pricetrend")
+    # return Imgur.showImgur("pricetrend")
 
 
 
