@@ -284,10 +284,7 @@ def price_trend(stock):
     fig.savefig('pricetrend.jpg')
     return Imgur.showImgur("pricetrend")
 
-PROXIES = {
-  'http': 'proxy.capital.com.tw:8080',
-  'https': 'proxy.capital.com.tw:8080',
-}
+
 
 #股票股利
 def dividend_cash(stock):
@@ -300,7 +297,7 @@ def dividend_cash(stock):
         "start_date": f"{date_first}",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNyAxMTowMzowMCIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYwLjI1MC4xMTYuMTE4In0.Cv-EZoBQb7o1J9N7noD5AFWoaWN2jvcOsyUYb7qoIzQ", # 參考登入，獲取金鑰
     }
-    data = requests.get(url, params=parameter,proxies=PROXIES)
+    data = requests.get(url, params=parameter)
     data = data.json()
     data = pd.DataFrame(data['data'])
     df = data[['stock_id','date','StockEarningsDistribution','CashEarningsDistribution']]
