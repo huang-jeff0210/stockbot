@@ -8,6 +8,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import plotly.express as px
 import Imgur
 import mplfinance as mpf
 
@@ -244,6 +245,44 @@ def price_trend(stock):
     return Imgur.showImgur("pricetrend")
 
 
+#股票股利
+def dividend_cash(stock):
+    date = datetime.now().date() - relativedelta(years=6)
+    date_first = datetime(date.year, 1, 1)
+    url = "https://api.finmindtrade.com/api/v4/data"
+    parameter = {
+        "dataset": "TaiwanStockDividend",
+        "data_id": f"{stock}",
+        "start_date": f"{date_first}",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNyAxMTowMzowMCIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYwLjI1MC4xMTYuMTE4In0.Cv-EZoBQb7o1J9N7noD5AFWoaWN2jvcOsyUYb7qoIzQ", # 參考登入，獲取金鑰
+    }
+    data = requests.get(url, params=parameter)
+    data = data.json()
+    data = pd.DataFrame(data['data'])
+    df = data[['stock_id','date','StockEarningsDistribution','CashEarningsDistribution']]
+    df['date'] = pd.to_datetime(data['date'])
+
+    # 按照年份進行分組並對StockEarningsDistribution和CashEarningsDistribution進行求和
+    grouped_data = df.groupby(df['date'].dt.year)[['StockEarningsDistribution', 'CashEarningsDistribution']].sum().reset_index()
+    grouped_data.columns = ['日期','股票股利','現金股利']
+
+    font_path = './msjh.ttc'
+    font_prop = FontProperties(fname=font_path)
+
+    fig = px.bar(grouped_data, x='日期',y=['股票股利','現金股利'], barmode='group', title=f'{stock}股票股利', color_discrete_sequence=['#FF5151', '#84C1FF'])
+
+    # Update the x-axis label
+    fig.update_layout(xaxis_title='日期')
+
+    # Update the y-axis label
+    fig.update_layout(yaxis_title='元')
+
+    # Update the legend labels
+    fig.update_layout(legend_title='類別', legend=dict(title='類別'))
+
+    # Show the chart
+    fig.savefig('dividendcash.jpg')
+    return Imgur.showImgur("dividendcash")
 
 
 
