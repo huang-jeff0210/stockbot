@@ -9,6 +9,8 @@ warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import plotly.express as px
+import plotly.io as pio
+from bs4 import BeautifulSoup
 import Imgur
 import mplfinance as mpf
 
@@ -132,7 +134,7 @@ def get_invest(text):
         return result_str
 
 #即時報價
-def get_price(stock):
+def get_price_old(stock):
     url = f'https://srvsolgw.capital.com.tw/info/Query.aspx?stocks={stock}&types=Open,High,Low,Deal,DQty,YDay'
     resp = requests.get(url)
     data = resp.text
@@ -159,6 +161,44 @@ def get_price(stock):
     else:
         text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:{highlow}%"
     
+    return text
+
+
+def get_price(stock_id):
+    url = f"https://tw.quote.finance.yahoo.net/quote/q?type=ta&perd=d&mkt=10&sym={stock_id}&v=1&callback=jQuery111302872649618000682_1649814120914&_=1649814120915"
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/111.25 (KHTML, like Gecko) Chrome/99.0.2345.81 Safari/123.36'}
+    res = requests.get(url,headers=headers)
+
+    # 最新價格
+    current = [l for l in res.text.split('{') if len(l)>=58][-1]
+    current = current.replace('"','').split(',')
+    # 昨日價格
+    yday = float(re.search(':.*',[l for l in res.text.split('{') if len(l)>=58][-2].split(',')[4]).group()[1:])
+
+    df = pd.DataFrame({
+        '開盤價':float(re.search(':.*',current[1]).group()[1:]),
+        '最高價':float(re.search(':.*',current[2]).group()[1:]),
+        '最低價':float(re.search(':.*',current[3]).group()[1:]),
+        '現價':float(re.search(':.*',current[4]).group()[1:]),
+        '成交量':float(re.search(':.*',current[5].replace('}]','')).group()[1:]),
+        '漲跌幅':round((float(re.search(':.*',current[4]).group()[1:])/yday-1)*100,2)
+    },index=[stock_id]).reset_index()
+
+    numeric_columns = ['開盤價', '最高價', '最低價', '現價', '成交量','漲跌幅']
+    df[numeric_columns] = df[numeric_columns].astype(float)
+
+    stock_id = df['index'].iloc[0]
+    current_price = df['現價'].iloc[0]
+    trade_volume = df['成交量'].iloc[0]
+    highlow = df['漲跌幅'].iloc[0]
+
+    if highlow > 0:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:▲{highlow}%"
+    elif highlow < 0:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:▼{highlow}%"
+    else:
+        text = f"股號:{stock_id}\n現價:{current_price}元\n成交量:{trade_volume}張\n漲跌幅:{highlow}%"
+
     return text
     
 
@@ -244,11 +284,15 @@ def price_trend(stock):
     fig.savefig('pricetrend.jpg')
     return Imgur.showImgur("pricetrend")
 
+PROXIES = {
+  'http': 'proxy.capital.com.tw:8080',
+  'https': 'proxy.capital.com.tw:8080',
+}
 
 #股票股利
 def dividend_cash(stock):
     date = datetime.now().date() - relativedelta(years=6)
-    date_first = datetime(date.year, 1, 1)
+    date_first = datetime(date.year, 1, 1).strftime('%Y-%m-%d')
     url = "https://api.finmindtrade.com/api/v4/data"
     parameter = {
         "dataset": "TaiwanStockDividend",
@@ -256,7 +300,7 @@ def dividend_cash(stock):
         "start_date": f"{date_first}",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNyAxMTowMzowMCIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYwLjI1MC4xMTYuMTE4In0.Cv-EZoBQb7o1J9N7noD5AFWoaWN2jvcOsyUYb7qoIzQ", # 參考登入，獲取金鑰
     }
-    data = requests.get(url, params=parameter)
+    data = requests.get(url, params=parameter,proxies=PROXIES)
     data = data.json()
     data = pd.DataFrame(data['data'])
     df = data[['stock_id','date','StockEarningsDistribution','CashEarningsDistribution']]
@@ -269,7 +313,7 @@ def dividend_cash(stock):
     font_path = './msjh.ttc'
     font_prop = FontProperties(fname=font_path)
 
-    fig = px.bar(grouped_data, x='日期',y=['股票股利','現金股利'], barmode='group', title=f'{stock}股票股利', color_discrete_sequence=['#FF5151', '#84C1FF'])
+    fig = px.bar(grouped_data, x='日期',y=['股票股利','現金股利'], barmode='group', title=f'{stock_dict[stock]}({stock})股票股利', color_discrete_sequence=['#FF5151', '#84C1FF'])
 
     # Update the x-axis label
     fig.update_layout(xaxis_title='日期')
@@ -281,7 +325,7 @@ def dividend_cash(stock):
     fig.update_layout(legend_title='類別', legend=dict(title='類別'))
 
     # Show the chart
-    fig.savefig('dividendcash.jpg')
+    fig.write_image('dividendcash.jpg')
     return Imgur.showImgur("dividendcash")
 
 

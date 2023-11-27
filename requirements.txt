@@ -13,3 +13,4 @@ FinMind
 mplfinance
 python-dateutil
 plotly
+kaleido
