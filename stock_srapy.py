@@ -310,7 +310,7 @@ def dividend_cash(stock):
     plt.bar(grouped_data['日期'], grouped_data['股票股利'], color=['#FF5151'], label='股票股利',width=0.4)
     plt.xlabel('月份', fontproperties=font_prop)
     plt.ylabel('營收', fontproperties=font_prop)
-    plt.title('月營收', fontproperties=font_prop)
+    plt.title(f'{stock_dict[stock]}({stock})股票股利', fontproperties=font_prop)
     plt.legend(prop=font_prop)
     plt.tight_layout()
     fig.savefig('dividendcash.jpg')
@@ -330,11 +330,12 @@ def get_revenue(stock):
     data = requests.get(url, params=parameter)
     data = data.json()
     data = pd.DataFrame(data['data'])
+    data['date'] = pd.to_datetime(data['date'])
     fig = plt.figure(figsize=(10, 6))
     plt.bar(data['date'].dt.strftime('%Y/%m'), data['revenue'], color=['#B8B8DC'], label='月營收')
     plt.xlabel('月份', fontproperties=font_prop)
     plt.ylabel('營收', fontproperties=font_prop)
-    plt.title('月營收', fontproperties=font_prop)
+    plt.title(f'{stock_dict[stock]}({stock})月營收', fontproperties=font_prop)
     plt.xticks(rotation=45)  # 如果日期比較長，可以旋轉 x 軸標籤
     plt.legend(prop=font_prop)
     plt.tight_layout()  # 自動調整圖表布局，以避免標籤被截斷
