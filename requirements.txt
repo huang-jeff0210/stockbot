@@ -12,3 +12,4 @@ imgurpython
 FinMind
 mplfinance
 python-dateutil
+ploty
