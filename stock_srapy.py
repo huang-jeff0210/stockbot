@@ -304,15 +304,16 @@ def dividend_cash(stock):
     grouped_data = df.groupby(df['date'].dt.year)[['StockEarningsDistribution', 'CashEarningsDistribution']].sum().reset_index()
     grouped_data.columns = ['日期','股票股利','現金股利']
 
-    font_path = './msjh.ttc'
-    font_prop = FontProperties(fname=font_path)
-    fig = px.bar(grouped_data, x='日期',y=['股票股利','現金股利'], barmode='group', title=f'{stock_dict[stock]}({stock})股票股利', color_discrete_sequence=['#FF5151', '#84C1FF'])
 
-    fig.update_layout(xaxis_title='日期', font=font_prop)
-    fig.update_layout(yaxis_title='元', font=font_prop)
-    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})股票股利', font=font_prop)
-    fig.update_layout(legend_title='類別', legend=dict(title='類別'))
-    fig.write_image('dividendcash.jpg')
+    fig = plt.figure(figsize=(10, 6))
+    plt.bar(grouped_data['日期'], grouped_data['現金股利'], color=['#84C1FF'], label='現金股利',width=0.4,align='edge')
+    plt.bar(grouped_data['日期'], grouped_data['股票股利'], color=['#FF5151'], label='股票股利',width=0.4)
+    plt.xlabel('月份', fontproperties=font_prop)
+    plt.ylabel('營收', fontproperties=font_prop)
+    plt.title('月營收', fontproperties=font_prop)
+    plt.legend(prop=font_prop)
+    plt.tight_layout()
+    fig.savefig('dividendcash.jpg')
     return Imgur.showImgur("dividendcash")
 
 #月營收
@@ -329,15 +330,15 @@ def get_revenue(stock):
     data = requests.get(url, params=parameter)
     data = data.json()
     data = pd.DataFrame(data['data'])
-    font_path = './msjh.ttc'
-    font_prop = FontProperties(fname=font_path)
-    fig = px.bar(data, x='date', y=['revenue'],title=f'{stock_dict[stock]}({stock})月營收', color_discrete_sequence=['#9999CC'])
-    fig.update_layout(xaxis_title='月份', font=font_prop)
-    fig.update_layout(yaxis_title='營收', font=font_prop)
-    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})月營收', font=font_prop)
-    # Update the legend labels
-    fig.update_layout(legend_title='營收', legend=dict(title=''))
-    fig.write_image('revenue.jpg')
+    fig = plt.figure(figsize=(10, 6))
+    plt.bar(data['date'].dt.strftime('%Y/%m'), data['revenue'], color=['#B8B8DC'], label='月營收')
+    plt.xlabel('月份', fontproperties=font_prop)
+    plt.ylabel('營收', fontproperties=font_prop)
+    plt.title('月營收', fontproperties=font_prop)
+    plt.xticks(rotation=45)  # 如果日期比較長，可以旋轉 x 軸標籤
+    plt.legend(prop=font_prop)
+    plt.tight_layout()  # 自動調整圖表布局，以避免標籤被截斷
+    fig.savefig('revenue.jpg')
     return Imgur.showImgur("revenue")
 
 
