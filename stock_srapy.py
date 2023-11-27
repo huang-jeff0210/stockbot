@@ -306,12 +306,11 @@ def dividend_cash(stock):
 
     font_path = './msjh.ttc'
     font_prop = FontProperties(fname=font_path)
-    font = dict(family='Arial Unicode MS')
     fig = px.bar(grouped_data, x='日期',y=['股票股利','現金股利'], barmode='group', title=f'{stock_dict[stock]}({stock})股票股利', color_discrete_sequence=['#FF5151', '#84C1FF'])
 
-    fig.update_layout(xaxis_title='日期', font=font)
-    fig.update_layout(yaxis_title='元', font=font)
-    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})股票股利', font=font)
+    fig.update_layout(xaxis_title='日期', font=font_prop)
+    fig.update_layout(yaxis_title='元', font=font_prop)
+    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})股票股利', font=font_prop)
     fig.update_layout(legend_title='類別', legend=dict(title='類別'))
     fig.write_image('dividendcash.jpg')
     return Imgur.showImgur("dividendcash")
@@ -330,11 +329,12 @@ def get_revenue(stock):
     data = requests.get(url, params=parameter)
     data = data.json()
     data = pd.DataFrame(data['data'])
-    font = dict(family='Arial Unicode MS')
+    font_path = './msjh.ttc'
+    font_prop = FontProperties(fname=font_path)
     fig = px.bar(data, x='date', y=['revenue'],title=f'{stock_dict[stock]}({stock})月營收', color_discrete_sequence=['#9999CC'])
-    fig.update_layout(xaxis_title='月份', font=font)
-    fig.update_layout(yaxis_title='營收', font=font)
-    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})月營收', font=font)
+    fig.update_layout(xaxis_title='月份', font=font_prop)
+    fig.update_layout(yaxis_title='營收', font=font_prop)
+    fig.update_layout(title_text=f'{stock_dict[stock]}({stock})月營收', font=font_prop)
     # Update the legend labels
     fig.update_layout(legend_title='營收', legend=dict(title=''))
     fig.write_image('revenue.jpg')
