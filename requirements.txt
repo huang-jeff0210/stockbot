@@ -14,3 +14,4 @@ mplfinance
 python-dateutil
 plotly
 kaleido
+yfinance
