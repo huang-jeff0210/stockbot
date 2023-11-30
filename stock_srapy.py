@@ -321,12 +321,12 @@ def price_trend(stock):
                         close=bk_df['Close'],
                         increasing_line_color='red',
                         decreasing_line_color='green',
-                        name = "K 線")])
+                        name = "Candlestick")])
 
     # 交易量
     fig.add_trace(go.Bar(x=bk_df.index, y=bk_df['Volume'],
                         marker={'color': 'green'}, yaxis='y2',
-                            name = "交易量"))
+                            name = "Volume"))
 
     # 找出需要繪製的欄位
     columns = bk_df.columns
