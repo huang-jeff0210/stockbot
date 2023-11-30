@@ -275,12 +275,16 @@ def MarginPurchaseShortSale():
     return Imgur.showImgur("MarginPurchaseShortSale")
 
 
-
 #股價走勢
 def price_trend(stock):
-    end = datetime.now().date() # 資料結束時間
-    start = datetime.now().date() - relativedelta(months=6) # 資料開始時間
-    df = yf.download(f'{stock}.TW', start=start, end=end).reset_index()
+    End = datetime.now().date() # 資料結束時間
+    Start = datetime.now().date() - relativedelta(months=6) # 資料開始時間
+    try:
+        df = yf.download(f'{stock}.TW', start=Start, end=End).reset_index()
+    except:
+        pass
+    if len(df) == 0:    
+        df = yf.download(f'{stock}.TWO', start=Start, end=End).reset_index()
     #MA
     df['5MA'] = df['Close'].rolling(window=5).mean()
     df['10MA'] = df['Close'].rolling(window=10).mean()
