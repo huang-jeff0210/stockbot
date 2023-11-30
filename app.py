@@ -68,7 +68,7 @@ def handle_message(event):
         return 0
     
     elif re.match('融資融券',usespeak):
-        img_url = stock_srapy.()
+        img_url = stock_srapy.MarginPurchaseShortSale()
         line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
 
