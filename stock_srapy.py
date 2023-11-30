@@ -8,10 +8,12 @@ import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-import matplotlib.ticker as ticker
 import plotly.express as px
 import Imgur
 import mplfinance as mpf
+import matplotlib.ticker as ticker
+import plotly.graph_objects as go
+import yfinance as yf
 
 # 设置中文字体
 font_path = './msjh.ttc'
@@ -202,6 +204,7 @@ def get_price(stock_id):
     print(text)
     return text
     
+
 #查個股融資融券
 def stock_MarginPurchaseShortSale(stock):
     date = datetime.now().date() - timedelta(days=30)
@@ -272,53 +275,119 @@ def MarginPurchaseShortSale():
     return Imgur.showImgur("MarginPurchaseShortSale")
 
 
+
 #股價走勢
 def price_trend(stock):
-    date = datetime.now().date() - relativedelta(years=1)
-    url = "https://api.finmindtrade.com/api/v4/data"
-    parameter = {
-        "dataset": "TaiwanStockPrice",
-        "data_id": f"{stock}",
-        "start_date": f"{date}",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNiAxNzo0MDozMiIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYxLjIzMS41LjE3In0.KM9MXxIahnfxhqhKWjzSkGZ7gg0IDeUqGaw5LW7azjY"
-    }
-    response = requests.get(url, params=parameter)
-    data = response.json()
-    df = pd.DataFrame(data["data"])
-    df["date"] = pd.to_datetime(df["date"])
-    df.head(3)
-
-    df = df[["date", "Trading_Volume", "open", "max", "min", "close"]]
-    columns = ['Date', 'Volume', 'Open', 'High', 'Low', 'Close']
-    df.columns = columns
-
-    df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
-    df.set_index('Date', inplace=True)
-
+    end = datetime.now().date() # 資料結束時間
+    start = datetime.now().date() - relativedelta(months=6) # 資料開始時間
+    df = yf.download(f'{stock}.TW', start=start, end=end).reset_index()
+    #MA
     df['5MA'] = df['Close'].rolling(window=5).mean()
     df['10MA'] = df['Close'].rolling(window=10).mean()
     df['20MA'] = df['Close'].rolling(window=20).mean()
     df['60MA'] = df['Close'].rolling(window=60).mean()
-    df['120MA'] = df['Close'].rolling(window=120).mean()
+    df['13MA'] = df['Close'].rolling(window=13).mean()
+    #MACD
+    df['EMA'] = df['Close'].ewm(span=26).mean()
+    df['MACD'] = df['Close'].ewm(span=12).mean() - df['EMA']
+    df['MACD Histogram'] = df['MACD'] - df['MACD'].ewm(span=9).mean()
+    # #RSI
+    # df['Up Move'] = df['Close'].diff().apply(lambda x: x if x > 0 else 0)
+    # df['Down Move'] = df['Close'].diff().apply(lambda x: -x if x < 0 else 0)
+    
+    # df['Avg Gain'] = df['Up Move'].rolling(window=14).mean()
+    # df['Avg Loss'] = df['Down Move'].rolling(window=14).mean()
+    
+    # df['RS'] = df['Avg Gain'] / df['Avg Loss']
+    # df['RSI'] = 100 - (100 / (1 + df['RS']))
+    
+    #布林
+    df['Upper Band'] = df['13MA'] + (1.5 * df['Close'].std())
+    df['Lower Band'] = df['13MA'] - (1.5 * df['Close'].std())
+    df.drop(['13MA'], axis=1, inplace=True)
+    df['Date'] = pd.to_datetime(df['Date'])  # Convert Date column to datetime
+    
+    # 繪製圖表函式
+    bk_df = df
+    bk_df.index = bk_df["Date"].dt.strftime('%Y-%m-%d')
+    fig = go.Figure(data=[go.Candlestick(x=bk_df.index,
+                        open=bk_df['Open'],
+                        high=bk_df['High'],
+                        low=bk_df['Low'],
+                        close=bk_df['Close'],
+                        increasing_line_color='red',
+                        decreasing_line_color='green',
+                        name = "K 線")])
 
-    df = df.dropna()
-    mc = mpf.make_marketcolors(up='r',down='g',edge='',wick='inherit',volume='inherit')
+    # 交易量
+    fig.add_trace(go.Bar(x=bk_df.index, y=bk_df['Volume'],
+                        marker={'color': 'green'}, yaxis='y2',
+                            name = "交易量"))
 
-    added_plots = {"5MA" : mpf.make_addplot(df['5MA']),
-                "10MA" : mpf.make_addplot(df['10MA']),
-                "20MA" : mpf.make_addplot(df['20MA']),
-                "60MA" : mpf.make_addplot(df['60MA']),
-                "120MA" : mpf.make_addplot(df['120MA']),
-    }
-    s = mpf.make_mpf_style(marketcolors = mc)
-    fig, axes = mpf.plot(df, type='candle', style=s, volume=True, addplot=list(added_plots.values()), returnfig=True)
+    # 找出需要繪製的欄位
+    columns = bk_df.columns
+    exclude_columns = ['index','Date', 'Open', 'High',
+                        'Low', 'Close', 'Adj Close', 'Volume']
+    remain_columns = [col for col in columns if
+                        col not in exclude_columns]
+    min_close = bk_df['Close'].min() - bk_df['Close'].std()
+    max_close = bk_df['Close'].max() + bk_df['Close'].std()
+    # 繪製技術指標
+    for i in remain_columns:
+        if min_close <= bk_df[i].mean() <= max_close:
+            fig.add_trace(go.Scatter(x=bk_df.index, y=bk_df[i],
+                                    mode='lines', name=i))
+        else:
+            fig.add_trace(go.Scatter(x=bk_df.index, y=bk_df[i],
+                                    mode='lines', yaxis='y3', name=i))
 
-    axes[0].legend([None]*(len(added_plots)+2))
-    handles = axes[0].get_legend().legendHandles
-    labels = list(added_plots.keys())
-    axes[0].legend(handles=handles[:len(labels)], labels=labels)
-    fig.tight_layout()
-    fig.savefig('pricetrend.jpg')
+    # 加入懸停十字軸
+    fig.update_xaxes(showspikes=True, spikecolor="gray",
+                    spikemode="toaxis")
+    fig.update_yaxes(showspikes=True, spikecolor="gray",
+                    spikemode="across")
+    # 更新畫布大小並增加範圍選擇
+    fig.update_layout(
+        height=800,
+        width=1200,
+        yaxis={'domain': [0.35, 1]},
+        yaxis2={'domain': [0.15, 0.3]},
+        # 若要重疊 y1 和 y3, 可以改成
+        # yaxis3=dict(overlaying='y', side='right')
+        yaxis3={'domain': [0, 0.15]},
+        title=f"{stock}",
+        xaxis={
+            # 範圍選擇格
+            'rangeselector': {
+                'buttons': [
+                    {'count': 1, 'label': '1M',
+                    'step': 'month', 'stepmode': 'backward'},
+                    {'count': 6, 'label': '6M',
+                    'step': 'month', 'stepmode': 'backward'},
+                    {'count': 1, 'label': '1Y',
+                    'step': 'year', 'stepmode': 'backward'},
+                    {'step': 'all'}
+                ]
+            },
+            # 範圍滑動條
+            'rangeslider': {
+                'visible': True,
+                'thickness': 0.01,  # 滑動條的高度
+                'bgcolor': "#E4E4E4"  # 背景色
+            },
+            'type': 'date'
+        }
+    )
+
+    # 移除非交易日空值
+    # 生成該日期範圍內的所有日期
+    all_dates = pd.date_range(start=bk_df.index.min(),
+                                end=bk_df.index.max())
+    # 找出不在資料中的日期
+    breaks = all_dates[~all_dates.isin(bk_df.index)]
+    dt_breaks = breaks.tolist() # 轉換成列表格式
+    fig.update_xaxes(rangebreaks=[{'values': dt_breaks}])
+    fig.write_image('pricetrend.jpg')
     return Imgur.showImgur("pricetrend")
 
 #股票股利
