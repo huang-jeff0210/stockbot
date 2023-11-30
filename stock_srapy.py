@@ -304,7 +304,7 @@ def price_trend(stock):
     #布林
     df['Upper Band'] = df['13MA'] + (1.5 * df['Close'].std())
     df['Lower Band'] = df['13MA'] - (1.5 * df['Close'].std())
-    df.drop(['13MA'], axis=1, inplace=True)
+    df.drop(['13MA','EMA'], axis=1, inplace=True)
     df['Date'] = pd.to_datetime(df['Date'])  # Convert Date column to datetime
     
     # 繪製圖表函式
