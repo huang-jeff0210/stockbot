@@ -8,6 +8,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import matplotlib.ticker as ticker
 import plotly.express as px
 import Imgur
 import mplfinance as mpf
@@ -201,8 +202,8 @@ def get_price(stock_id):
     print(text)
     return text
     
-#查融資融券
-def MarginPurchaseShortSale(stock):
+#查個股融資融券
+def stock_MarginPurchaseShortSale(stock):
     date = datetime.now().date() - timedelta(days=30)
     url = "https://api.finmindtrade.com/api/v4/data"
     parameter = {
@@ -230,9 +231,46 @@ def MarginPurchaseShortSale(stock):
     axs[0].legend(prop=font_prop)
     axs[1].legend(prop=font_prop)
 
+    plt.savefig('stockMarginPurchaseShortSale.jpg')
+    plt.close() # 殺掉記憶體中的圖片
+    return Imgur.showImgur("stockMarginPurchaseShortSale")
+
+def MarginPurchaseShortSale():
+    date = datetime.now().date() - relativedelta(months=6)
+    date_first = datetime(date.year, 1, 1).strftime('%Y-%m-%d')
+    url = "https://api.finmindtrade.com/api/v4/data"
+    parameter = {
+        "dataset": "TaiwanStockTotalMarginPurchaseShortSale",
+        "start_date": f"{date_first}",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyMy0xMS0yNCAxOTo1NTo1NSIsInVzZXJfaWQiOiJKZWZmaHVhbmciLCJpcCI6IjYxLjIzMS41Ljc1In0.g86TUOTpETIiRWvYQdBGXXP3LugXYI0I5arWVTYa3TY", # 參考登入，獲取金鑰
+    }
+    data = requests.get(url, params=parameter)
+    data = data.json()
+    data = pd.DataFrame(data['data'])
+    data.head(3)
+    df = data[['TodayBalance','date','name']]
+
+    fig, axs = plt.subplots(2)
+    df['date'] = pd.to_datetime(df['date'])
+    axs[0].plot(df[df['name'] == 'ShortSale']['date'].dt.strftime('%m/%d'), df[df['name'] == 'ShortSale']['TodayBalance'],label='融券餘額(張)', color='#02DF82')
+    axs[1].plot(df[df['name'] == 'MarginPurchaseMoney']['date'].dt.strftime('%m/%d'), df[df['name'] == 'MarginPurchaseMoney']['TodayBalance']/100000000,label='融資餘額(億)',color='#FF5151')
+
+    axs[0].set_xticks([])
+    axs[1].xaxis.set_major_locator(ticker.MultipleLocator(10))
+    plt.xticks(rotation=45,fontsize=8)
+    axs[1].ticklabel_format(style='sci',scilimits=(-1,4),axis='y')
+    axs[0].legend(prop=font_prop)
+    axs[1].legend(prop=font_prop)
+
+
+    for a,b in zip(df[df['name'] == 'MarginPurchaseMoney'].iloc[::10]['date'].dt.strftime('%m/%d'), round(df[df['name'] == 'MarginPurchaseMoney'].iloc[::10]['TodayBalance']/100000000,0)):
+        axs[1].text(a,b,b, ha='center', va='bottom', fontsize= 6)
+
+
     plt.savefig('MarginPurchaseShortSale.jpg')
     plt.close() # 殺掉記憶體中的圖片
     return Imgur.showImgur("MarginPurchaseShortSale")
+
 
 #股價走勢
 def price_trend(stock):
