@@ -11,7 +11,7 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 import re, os
-import stock_srapy
+import stock_srapy, analyze
 
 app = Flask(__name__)
 
@@ -71,9 +71,19 @@ def handle_message(event):
         img_url = stock_srapy.MarginPurchaseShortSale()
         line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
+    
+    elif re.match('[0-9]{4}分析',usespeak):
+        answer = analyze.stock_gpt(usespeak[:4])
+        line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
+    
+    elif re.match('大盤分析',usespeak):
+        answer = analyze.stock_gpt(usespeak[:2])
+        line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
 
     elif re.match('[0-9]{4}融資融券',usespeak):
-        img_url = stock_srapy.stock_MarginPurchaseShortSale(usespeak[:4])
+        img_url = stock_srapy.MarginPurchaseShortSale(usespeak[:4])
         line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
     
