@@ -108,7 +108,7 @@ def stock_news_link(stock_name ="大盤"):
     if stock_name == "大盤":
         stock_name="台股 -盤中速報"
 
-    json_data = requests.get(f'https://ess.api.cnyes.com/ess/api/v1/news/keyword?q={text}&limit=10&page=1',stock_name).json()
+    json_data = requests.get(f'https://ess.api.cnyes.com/ess/api/v1/news/keyword?q={stock_name}&limit=10&page=1').json()
     items=json_data['data']['items']
 
     data=[]
