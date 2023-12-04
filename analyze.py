@@ -103,6 +103,36 @@ def stock_news(stock_name ="大盤"):
         data.append([stock_name, formatted_date ,title,p])
     return data
 
+# 新聞連結
+def stock_news_link(stock_name ="大盤"):
+    if stock_name == "大盤":
+        stock_name="台股 -盤中速報"
+
+    json_data = requests.get(f'https://ess.api.cnyes.com/ess/api/v1/news/keyword?q={text}&limit=10&page=1',stock_name).json()
+    items=json_data['data']['items']
+
+    data=[]
+    for item in items:
+        # 網址、標題和日期
+        news_id = item["newsId"]
+        title = item["title"]
+        summary = item["summary"]
+        url = f'https://news.cnyes.com/news/id/{news_id}'
+        tag = ','.join(item['keywordForTag'])
+        data.append([title, summary ,url,tag])
+
+    df = pd.DataFrame(data,columns=['title','summary','url','tag'])
+    df = df[~df['title'].str.contains('盤中速報')].reset_index(drop=True)
+
+    text = ''
+    for i in range(len(df)):
+        text += '標題:'+ df['title'].iloc[i] + '\n'
+        text += '標籤:'+ df['tag'].iloc[i] + '\n'
+        text += '網址:'+ df['url'].iloc[i] + '\n'
+        text += '---------------'+'\n'
+    return text
+
+
 # 取得全部股票的股號、股名
 def stock_name():
     df = pd.read_csv('stock.csv')

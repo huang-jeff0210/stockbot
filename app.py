@@ -72,6 +72,16 @@ def handle_message(event):
         line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
     
+    elif re.match('.*新聞$',usespeak):
+        answer = analyze.stock_news_link(usespeak[:-2])
+        line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
+
+    elif re.match('[0-9]{4}基本面',usespeak):
+        answer = analyze.stock_fundamental(usespeak[:4])
+        line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
+
     elif re.match('[0-9]{4}分析',usespeak):
         answer = analyze.stock_gpt(usespeak[:4])
         line_bot_api.push_message(uid, TextSendMessage(answer))
