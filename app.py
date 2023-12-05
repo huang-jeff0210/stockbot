@@ -11,7 +11,7 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import *
 import re, os
-import stock_srapy, analyze
+import stock_srapy, analyze, summary
 
 app = Flask(__name__)
 
@@ -72,16 +72,6 @@ def handle_message(event):
         line_bot_api.push_message(uid, ImageSendMessage(original_content_url=img_url, preview_image_url=img_url))
         return 0
     
-    elif re.match('.*新聞$',usespeak):
-        answer = analyze.stock_news_link(usespeak[:-2])
-        line_bot_api.push_message(uid, TextSendMessage(answer))
-        return 0
-
-    elif re.match('[0-9]{4}基本面',usespeak):
-        answer = analyze.stock_fundamental_select(usespeak[:4])
-        line_bot_api.push_message(uid, TextSendMessage(answer))
-        return 0
-
     elif re.match('[0-9]{4}分析',usespeak):
         answer = analyze.stock_gpt(usespeak[:4])
         line_bot_api.push_message(uid, TextSendMessage(answer))
@@ -90,6 +80,18 @@ def handle_message(event):
     elif re.match('大盤分析',usespeak):
         answer = analyze.stock_gpt(usespeak[:2])
         line_bot_api.push_message(uid, TextSendMessage(answer))
+        return 0
+    
+    elif re.match('年報[0-9]{4},[0-9]{3}',usespeak):
+        stock = usespeak[2:6]
+        year = usespeak[-3:]
+        print(stock,year)
+        # db = summary.get_db(year,stock)
+        # summary_all = summary.get_summary(db)
+        # line_bot_api.push_message(uid, TextSendMessage(summary_all))
+
+        # result = summary.analyze_chain(db,'公司的營收狀況如何?')
+        # line_bot_api.push_message(uid, TextSendMessage(result))
         return 0
 
     elif re.match('[0-9]{4}融資融券',usespeak):
