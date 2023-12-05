@@ -69,8 +69,10 @@ def stock_fundamental_select(stock_id= "大盤"):
             'EPS': quarterly_eps.tolist(),
             'EPS 季增率': quarterly_eps_growth.tolist()
         }
+        print(data)
 
-        data = pd.DataFrame(data)
+        data = pd.DataFrame(data, columns=['季日期', '營收成長率', 'EPS', 'EPS 季增率'])
+        print(data)
         text = data.to_string(index=False)
 
         return text
