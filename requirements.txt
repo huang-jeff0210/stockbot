@@ -17,5 +17,5 @@ kaleido
 yfinance
 openai
 langchain
-pdfplumber==0.10.2
+pdfplumber
 faiss-cpu
