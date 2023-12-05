@@ -41,6 +41,41 @@ def stock_price(stock_id="大盤", days = 10):
 
     return data
 
+# 單查基本面資料
+def stock_fundamental_select(stock_id= "大盤"):
+    if stock_id == "大盤":
+        return None
+    else:
+
+        stock = yf.Ticker(f'{stock_id}.TW')
+
+        if len(stock.quarterly_financials) == 0:
+            stock = yf.Ticker(f'{stock_id}.TWO')
+
+
+        # 營收成長率
+        quarterly_revenue_growth = np.round(stock.quarterly_financials.loc["Total Revenue"].pct_change(-1).dropna().tolist(), 2)
+        # 每季EPS
+        quarterly_eps = np.round(stock.quarterly_financials.loc["Basic EPS"].dropna().tolist(), 2)
+        # EPS季增率
+        quarterly_eps_growth = np.round(stock.quarterly_financials.loc["Basic EPS"].pct_change(-1).dropna().tolist(), 2)
+
+        # 轉換日期
+        dates = [date.strftime('%Y-%m-%d') for date in stock.quarterly_financials.columns]
+
+        data = {
+            '季日期': dates[:len(quarterly_revenue_growth)],  # 以最短的數據列表長度為准，確保數據對齊
+            '營收成長率': quarterly_revenue_growth.tolist(),
+            'EPS': quarterly_eps.tolist(),
+            'EPS 季增率': quarterly_eps_growth.tolist()
+        }
+
+        data = pd.DataFrame(data)
+        text = data.to_string(index=False)
+
+        return text
+
+
 # 基本面資料
 def stock_fundamental(stock_id= "大盤"):
     if stock_id == "大盤":

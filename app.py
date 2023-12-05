@@ -78,7 +78,7 @@ def handle_message(event):
         return 0
 
     elif re.match('[0-9]{4}基本面',usespeak):
-        answer = analyze.stock_fundamental(usespeak[:4])
+        answer = analyze.stock_fundamental_select(usespeak[:4])
         line_bot_api.push_message(uid, TextSendMessage(answer))
         return 0
 
