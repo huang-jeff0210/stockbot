@@ -16,6 +16,6 @@ plotly
 kaleido
 yfinance
 openai
-langchain
+langchain==0.0.345
 pdfplumber
 faiss-cpu
